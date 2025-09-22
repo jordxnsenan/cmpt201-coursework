@@ -1,0 +1,14 @@
+#include <stdio.h>
+
+int main(void) {
+  
+  char* userInput = NULL;
+  char* bufferSize = 0;
+
+  printf("Enter programs to run: ");
+  getline(&userInput, &bufferSize, stdin);
+
+
+  
+  return 0;
+}

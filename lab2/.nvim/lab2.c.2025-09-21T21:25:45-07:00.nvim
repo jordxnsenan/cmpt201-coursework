@@ -1,0 +1,51 @@
+#define _GNU_SOURCE // needed to add this for newline function to work
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
+int main(void) {
+
+  char* userInput = NULL;
+  size_t bufferSize = 0;
+
+  pid_t processID = fork();
+
+  if (processID < 0) {
+    perror("ERROR: fork failed.\n");
+
+    return EXIT_FAILURE;
+  }
+
+  while (1) {
+    printf("Enter programs to run: ");
+    getline(&userInput, &bufferSize, stdin);
+
+    // removes trailing newline as per hint 1
+    userInput[strcspn(userInput, "\n")] = '\0';
+
+    processID = fork();
+
+    if (processID == 0) {
+      execl(userInput, userInput, NULL);
+      printf("ERROR: exec failed\n");
+
+      exit(EXIT_FAILURE);
+    }
+
+    else if (processID > 0) {
+      waitpid(processID, NULL, 0);
+    }
+
+    else {
+      perror("ERROR: fork failed\n");
+
+      exit(EXIT_FAILURE);
+    }
+
+    free(userInput);
+  }
+
+  return 0;
+}
