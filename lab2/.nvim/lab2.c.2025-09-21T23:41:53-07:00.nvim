@@ -28,15 +28,17 @@ int main(void) {
       break;
     }
 
-    else if (userOption == JOKE_ACTION) {
+    else if(userOption == JOKE_ACTION)
+    {
       free(userInput);
-
+      
       continue;
     }
 
+
     else {
       handleUserRequest(userInput);
-
+      
       free(userInput);
     }
   }

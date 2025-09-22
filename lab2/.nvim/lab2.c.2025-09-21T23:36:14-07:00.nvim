@@ -6,13 +6,10 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-void handleUserRequest(const char *);
+void handleUserRequest(const char*);
 char *getUserInput(void);
-int processUserInput(const char *);
+int processUserInput(const char*);
 
-const int NORMAL_ACTION = 2;
-const int EXIT_ACTION = 0;
-const int JOKE_ACTION = 1;
 int main(void) {
 
   while (1) {
@@ -21,24 +18,27 @@ int main(void) {
     char *userInput = getUserInput();
 
     int userOption = processUserInput(userInput);
-
-    if (userOption == EXIT_ACTION) {
+    
+    if(userOption == 0)
+    {
       free(userInput);
 
       break;
     }
 
-    else if (userOption == JOKE_ACTION) {
+    else if(userOption == NORMAL_ACTION)
+    {
       free(userInput);
 
       continue;
     }
 
-    else {
+    else
+    {
       handleUserRequest(userInput);
-
-      free(userInput);
     }
+
+    free(userInput);
   }
 
   return 0;
@@ -97,9 +97,7 @@ void handleUserRequest(const char *option) {
     exit(EXIT_FAILURE);
   }
 
-  else if (processId > 0) {
-    waitpid(processId, NULL, 0);
-  }
+  else if(processId > 0) { waitpid(processId, NULL, 0); }
 
   else {
     perror("ERROR: fork failed...\n");

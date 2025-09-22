@@ -6,39 +6,62 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-void handleUserRequest(const char *);
-char *getUserInput(void);
-int processUserInput(const char *);
+void handleUserRequest();
+char *determineUserRequest(const char *input);
+void handleUserRequest(const char *option);
 
-const int NORMAL_ACTION = 2;
-const int EXIT_ACTION = 0;
-const int JOKE_ACTION = 1;
 int main(void) {
 
   while (1) {
     printf("Enter programs to run: ");
 
-    char *userInput = getUserInput();
+    char* userInput = getUserInput();
 
-    int userOption = processUserInput(userInput);
-
-    if (userOption == EXIT_ACTION) {
-      free(userInput);
+    int userOption = 
+    // exit when only enter pressed by user
+    size_t lengthOfInput = strlen(userInput);
+    if (lengthOfInput == 0) {
+      printf("Exiting Program.\n");
 
       break;
     }
 
-    else if (userOption == JOKE_ACTION) {
-      free(userInput);
+    // checks if user typed 'exit'
+    bool typedExit = strcmp(userInput, "exit") == 0;
+    if (typedExit) {
+      printf("Exiting Program\n");
+
+      break;
+    }
+
+    // checks if user typed 'joke'
+    bool typedJoke = strcmp(userInput, "joke") == 0;
+    if (typedJoke) {
+      printf("What do you call a group of programmers? An Assembly\n");
 
       continue;
     }
 
-    else {
-      handleUserRequest(userInput);
+    processID = fork();
 
-      free(userInput);
+    if (processID == 0) {
+      execl(userInput, userInput, NULL);
+      printf("ERROR: exec failed\n");
+
+      exit(EXIT_FAILURE);
     }
+
+    else if (processID > 0) {
+      waitpid(processID, NULL, 0);
+    }
+
+    else {
+      perror("ERROR: fork failed\n");
+
+      exit(EXIT_FAILURE);
+    }
+
+    free(userInput);
   }
 
   return 0;
@@ -58,7 +81,7 @@ char *getUserInput() {
 }
 
 // function that performs specific operation based on the users passed string
-int processUserInput(const char *input) {
+char *getUserInput(const char *input) {
   const int EXIT_COMMAND = 0;
   const int JOKE_COMMAND = 1;
   const int NORMAL_COMMAND = 2;
@@ -97,9 +120,7 @@ void handleUserRequest(const char *option) {
     exit(EXIT_FAILURE);
   }
 
-  else if (processId > 0) {
-    waitpid(processId, NULL, 0);
-  }
+  elseif(processId > 0) { waitpid(processID, NULL, 0); }
 
   else {
     perror("ERROR: fork failed...\n");

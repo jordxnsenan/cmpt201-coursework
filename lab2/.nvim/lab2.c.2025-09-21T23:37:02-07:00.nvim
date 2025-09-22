@@ -11,8 +11,7 @@ char *getUserInput(void);
 int processUserInput(const char *);
 
 const int NORMAL_ACTION = 2;
-const int EXIT_ACTION = 0;
-const int JOKE_ACTION = 1;
+
 int main(void) {
 
   while (1) {
@@ -22,13 +21,13 @@ int main(void) {
 
     int userOption = processUserInput(userInput);
 
-    if (userOption == EXIT_ACTION) {
+    if (userOption == 0) {
       free(userInput);
 
       break;
     }
 
-    else if (userOption == JOKE_ACTION) {
+    else if (userOption == NORMAL_ACTION) {
       free(userInput);
 
       continue;
@@ -36,9 +35,9 @@ int main(void) {
 
     else {
       handleUserRequest(userInput);
-
-      free(userInput);
     }
+
+    free(userInput);
   }
 
   return 0;
