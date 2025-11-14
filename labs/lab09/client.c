@@ -1,26 +1,31 @@
 /*
 Questions to answer at top of client.c:
 (You should not need to change the code in client.c)
-1. What is the address of the server it is trying to connect to (IP address and port number).
+1. What is the address of the server it is trying to connect to (IP address and
+port number).
 
    127.0.0.1:8000
 
 2. Is it UDP or TCP? How do you know?
 
-   TCP , this is evident by the fact that the socket is created with SOCK_STREAM within the socket()
-   call
+   TCP , this is evident by the fact that the socket is created with SOCK_STREAM
+within the socket() call
 
-3. The client is going to send some data to the server. Where does it get this data from? How can you tell in the code?
+3. The client is going to send some data to the server. Where does it get this
+data from? How can you tell in the code?
 
-   Gets data from the standard input file stream. The read() call reads from STDIN_FILENO into the buf variable writes the 
-   input data to the socket w/the write() call
+   Gets data from the standard input file stream. The read() call reads from
+STDIN_FILENO into the buf variable writes the input data to the socket w/the
+write() call
 
 4. How does the client program end? How can you tell that in the code?
 
-   Ends in the event of either reaching the end of the input, an input less than 1 byte being read or when an error occuers.
-   You can tell from the loop condiion which reads into num_read so long as the input is greater than 1 byte. In the event of no
-   error it closes the socket and exits w/ exit(EXIT_SUCCESS). But when error occurs, it calls handle_error which terminates the program
-   w/ exit(EXIT_FAILURE)
+   Ends in the event of either reaching the end of the input, an input less than
+1 byte being read or when an error occuers. You can tell from the loop condiion
+which reads into num_read so long as the input is greater than 1 byte. In the
+event of no error it closes the socket and exits w/ exit(EXIT_SUCCESS). But when
+error occurs, it calls handle_error which terminates the program w/
+exit(EXIT_FAILURE)
 */
 
 #include <arpa/inet.h>
