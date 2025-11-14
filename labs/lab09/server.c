@@ -6,6 +6,7 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <stdbool.h>
 
 #define BUF_SIZE 64
 #define PORT 8000
@@ -32,16 +33,65 @@ struct client_info {
 };
 
 void *handle_client(void *arg) {
-  struct client_info *client = (struct client_info *)arg;
+  //struct client_info *client = (struct client_info *)arg;
 
   // TODO: print the message received from client
   // TODO: increase total_message_count per message
+  struct client_info *client = (struct client_info *)arg;
+
+  int client_socket_fd = client->cfd;
+  int client_id = client->client_id;
+
+  char message_buffer[BUF_SIZE];
+
+  // Loop to repeatedly read messages from this client's socket
+  while(true) 
+  {
+    // Read() blocks until data arrives or the client disconnects
+    ssize_t bytes_read = read(client_socket_fd,
+                              message_buffer,
+                              BUF_SIZE); 
+
+    if (bytes_read <= 0) {
+      break; 
+    }
+
+    // Null-terminate the received message so we can treat it as a string
+    message_buffer[bytes_read] = '\0';
+
+    // Safely increment global message counter
+    int message_number = 0;
+
+    pthread_mutex_lock(&count_mutex);
+    {
+        total_message_count++;
+
+        message_number = total_message_count;
+    }
+    pthread_mutex_unlock(&count_mutex);
+
+    printf("Msg # %d; Client ID %d: %s\n",
+           message_number,
+           client_id,
+           message_buffer);
+  }
+
+  // If we reach here, the client disconnected
+  printf("Ending thread for client %d\n", client_id);
+
+  // Clean up: close socket and free allocated memory
+  close(client_socket_fd);
+  free(client);
+
+  // Exit the thread
+  return NULL;
 
   return NULL;
 }
 
 int main() {
   struct sockaddr_in addr;
+
   int sfd;
 
   sfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -63,10 +113,63 @@ int main() {
   }
 
   for (;;) {
+    struct sockaddr_in client_address;
+    socklen_t client_address_length = sizeof(client_address);
 
+    // accepts new client conn.
+    int client_socket_fd = accept(sfd,
+                                 (struct sockaddr*)&client_address,
+                                 &client_address_length);
+    
+    if(client_socket_fd == -1) {
+        perror("accept");
+        continue;
+    }
+
+    // allocate space for client info
+    struct client_info* client_data = malloc (sizeof(struct client_info));
+    if(client_data == NULL)
+    {
+        perror("malloc");
+
+        close(client_socket_fd);
+
+        continue;
+    }
+
+    // assign client ID safely w/ mutex
+    pthread_mutex_lock(&client_id_mutex);
+
+    {
+        client_data -> client_id = client_id_counter;
+        client_id_counter++;
+    }
+
+    pthread_mutex_unlock(&client_id_mutex);
+
+    client_data -> cfd = client_socket_fd;
+
+    // Print a message indicating a new client has connected
+    printf("New client created! ID %d on socket FD %d\n", 
+         client_data->client_id, 
+         client_data->cfd);
+        
     // TODO: create a new thread when a new connection is encountered
     // TODO: call handle_client() when launching a new thread, and provide
     // client_info
+    pthread_t thread_id;
+
+    if (pthread_create(&thread_id, NULL, handle_client, client_data) != 0) {
+        
+        perror("pthread_create");
+        close(client_socket_fd);
+        free(client_data);
+
+        continue;               
+  }
+
+  // Detach the thread so it cleans itself up after finishing
+  pthread_detach(thread_id);
   }
 
   if (close(sfd) == -1) {
