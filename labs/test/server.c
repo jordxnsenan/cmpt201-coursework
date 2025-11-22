@@ -13,7 +13,7 @@
 within run_client()
  *
  * Why are these sockets made non-blocking? What purpose does it serve?
- * The listening socket is non-blocking so accept() doesnt block forever + s/*
+ * The listening socket is non-blocking so accept() doesnt block forever + s
 Questions to answer at top of server.c:
 (You should not need to change client.c)
 
@@ -40,8 +40,8 @@ acceptor thread can continuously check aargs.rum and shut down cleanly
 The client sockets are non-blocking to ensure read() does not block forever and
 so that the client threads can notice when run flag is set to false and exit
 instead of being stuck.
-
 */
+
 #include <arpa/inet.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -291,8 +291,6 @@ int main() {
     if (current >= target) {
       break;
     }
-
-    sleep(1000);
   }
 
   aargs.run = false;
