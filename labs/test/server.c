@@ -5,8 +5,7 @@
  * Explain the use of non-blocking sockets in this lab.
  *
  * How are sockets made non-blocking?
- * with a call to set_non_blocking() function which utilizes fcntl to add
-0_NONBLOCK flag to
+ * with a call to set_non_blocking() function which utilizes fcntl to add 0_NONBLOCK flag to
  * the file descriptor
  *
  * What sockets are made non-blocking?
@@ -18,6 +17,7 @@ within run_client()
 Questions to answer at top of server.c:
 (You should not need to change client.c)
 
+/*
 Understanding the Client:
 1. How is the client sending data to the server? What protocol?
 Using TCP and by writing bytes over that socket
