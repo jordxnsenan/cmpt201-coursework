@@ -1,0 +1,33 @@
+// this is the server
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+
+int main(void) {
+  printf("server\n");
+
+  // socket
+  int socket_fd = socket(AF_UNIX, SOCK_STREAM, 0);
+
+  if (socket_fd == -1) {
+    perror("socket failed");
+    exit(EXIT_FAILURE);
+  }
+  // bind
+  // sockaddr is a family of structs, that is why you must pass the length and
+  // not just use sizeof()
+  struct sockaddr_un sockstruct;:w
+    
+  if (bind(socket_fd, const struct sockaddr* addr, socklen_t addrelen) == -1)
+  {
+    perror("bind failed");
+    exit(EXIT_FAILURE);
+  }
+  // listen
+  // accept
+  // read
+  // close
+
+  return 0;
+}

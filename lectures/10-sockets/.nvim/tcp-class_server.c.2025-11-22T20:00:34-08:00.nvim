@@ -1,0 +1,35 @@
+// this is the server
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/socket.h> // for socket()
+#include <sys/un.h> // for unix struct
+
+int main(void) {
+  printf("server\n");
+
+  // socket
+  int socket_fd = socket(AF_UNIX, SOCK_STREAM, 0);
+  // always check for errors - if first fails it will use garbage as the socket
+  if(socket_fd == -1) {
+    perror("socket failed");
+    exit(EXIT_FAILURE);
+  }
+
+  // bind
+      struct sockaddr_un {
+               sa_family_t sun_family;               /* AF_UNIX */
+               char        sun_path[108];            /* Pathname */
+           };
+  // cannot just use sizeof() because it is a family of structs that may all have different
+  // length
+  if ( bind(socket_fd , const struct sockaddr *addr, socklen_t addrlen) == -1) {
+    perror("bind failed");
+    exit(EXIT_FAILURE);
+  }
+  // listen
+  // accept
+  // read
+  // close
+
+  return 0;
+}
