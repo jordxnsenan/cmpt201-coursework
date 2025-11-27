@@ -63,25 +63,24 @@ int main() {
                                    "signature3.sig"};
 
   // TODO: Load the public key using PEM_read_PUBKEY
-  const char *pubkey_filename = "public_key.pm";
+  const char* pubkey_filename = "public_key.pem";
 
-  FILE *pub_file = fopen("public_key.pm", "r");
+  FILE* pub_file = fopen(pubkey_filename, "r");
 
-  if (pub_file == NULL) {
-    handle_error("Error opening public_key.pm");
+  if(pub_file == NULL) {
+    handle_error("Error opening public_key.pem");
   }
 
   EVP_PKEY *pubkey = PEM_read_PUBKEY(pub_file, NULL, NULL, NULL);
 
   fclose(pub_file);
 
-  if (pubkey == NULL) {
-    fprintf(stderr, "Error: unable to load public key from %s\n",
-            pubkey_filename);
-
-    ERR_print_errors_fp(stderr);
-
-    exit(EXIT_FAILURE);
+    if (pubkey == NULL) {
+        fprintf(stderr, "Error: unable to load public key from %s\n", pubkey_filename);
+        
+        ERR_print_errors_fp(stderr);
+        
+        exit(EXIT_FAILURE);
   }
 
   // Verify each message
@@ -119,53 +118,49 @@ int verify(const char *message_path, const char *sign_path, EVP_PKEY *pubkey) {
   unsigned char message[MAX_FILE_SIZE];
   unsigned char signature[MAX_FILE_SIZE];
 
-  size_t message_length = 0;
-  size_t signature_length = 0;
+size_t message_length = 0;
+size_t signature_length = 0;
 
-  message_length = read_all_bytes(message_path, message, MAX_FILE_SIZE);
-  signature_length = read_all_bytes(sign_path, signature, MAX_FILE_SIZE);
+    message_length = read_all_bytes(message_path, message, MAX_FILE_SIZE);
+    signature_length = read_all_bytes(sign_path, signature, MAX_FILE_SIZE);
 
-  EVP_MD_CTX *digest_context = EVP_MD_CTX_new();
+    EVP_MD_CTX *digest_context = EVP_MD_CTX_new();
 
-  if (digest_context == NULL) {
-    fprintf(stderr, "unable to allocate EVP_MD_CTX\n");
-    return -1;
-  }
+    if (digest_context == NULL) {
+        fprintf(stderr, "unable to allocate EVP_MD_CTX\n");
+        return -1;
+    }
 
-  if (EVP_DigestVerifyInit(digest_context, NULL, EVP_sha256(), NULL, pubkey) !=
-      1) {
-    fprintf(stderr, "Error: EVP_DigestVerifyInit failed\n");
-    ERR_print_errors_fp(stderr);
+    if (EVP_DigestVerifyInit(digest_context, NULL, EVP_sha256(), NULL, pubkey) != 1) {
+        fprintf(stderr, "Error: EVP_DigestVerifyInit failed\n");
+        ERR_print_errors_fp(stderr);
+        EVP_MD_CTX_free(digest_context);
+        return -1;
+    }
+
+    if (EVP_DigestVerifyUpdate(digest_context, message, message_length) != 1) {
+        fprintf(stderr, "Error: EVP_DigestVerifyUpdate failed\n");
+        ERR_print_errors_fp(stderr);
+        EVP_MD_CTX_free(digest_context);
+        return -1;
+    }
+
+    int verify_status = EVP_DigestVerifyFinal(digest_context, signature, signature_length);
+
     EVP_MD_CTX_free(digest_context);
-    return -1;
-  }
 
-  if (EVP_DigestVerifyUpdate(digest_context, message, message_length) != 1) {
-    fprintf(stderr, "Error: EVP_DigestVerifyUpdate failed\n");
-    ERR_print_errors_fp(stderr);
-    EVP_MD_CTX_free(digest_context);
-    return -1;
-  }
+    bool is_valid_signature = verify_status == 1;
+    bool is_invalid_signature = verify_status == 0;
 
-  int verify_status =
-      EVP_DigestVerifyFinal(digest_context, signature, signature_length);
-
-  EVP_MD_CTX_free(digest_context);
-
-  bool is_valid_signature = verify_status == 1;
-  bool is_invalid_signature = verify_status == 0;
-
-  if (is_valid_signature) {
-    return 1;
-  }
-
-  else if (is_invalid_signature) {
-    return 0;
-  }
-
-  else {
-    fprintf(stderr, "Error: EVP_DigestVerifyFinal returned error\n");
-    ERR_print_errors_fp(stderr);
-    return -1;
-  }
+    if (is_valid_signature) {
+        return 1;
+    } 
+    else if (is_invalid_signature) {
+        return 0;
+    } 
+    else {
+        fprintf(stderr, "Error: EVP_DigestVerifyFinal returned error\n");
+        ERR_print_errors_fp(stderr);
+        return -1;
+    }
 }

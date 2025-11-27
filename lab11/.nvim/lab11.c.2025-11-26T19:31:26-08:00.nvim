@@ -63,12 +63,12 @@ int main() {
                                    "signature3.sig"};
 
   // TODO: Load the public key using PEM_read_PUBKEY
-  const char *pubkey_filename = "public_key.pm";
+  const char *pubkey_filename = "public_key.pem";
 
-  FILE *pub_file = fopen("public_key.pm", "r");
+  FILE *pub_file = fopen(pubkey_filename, "r");
 
   if (pub_file == NULL) {
-    handle_error("Error opening public_key.pm");
+    handle_error("Error opening public_key.pem");
   }
 
   EVP_PKEY *pubkey = PEM_read_PUBKEY(pub_file, NULL, NULL, NULL);
@@ -157,11 +157,11 @@ int verify(const char *message_path, const char *sign_path, EVP_PKEY *pubkey) {
 
   if (is_valid_signature) {
     return 1;
-  }
+  } 
 
   else if (is_invalid_signature) {
     return 0;
-  }
+  } 
 
   else {
     fprintf(stderr, "Error: EVP_DigestVerifyFinal returned error\n");
