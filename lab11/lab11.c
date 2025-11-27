@@ -118,8 +118,49 @@ int verify(const char *message_path, const char *sign_path, EVP_PKEY *pubkey) {
   unsigned char message[MAX_FILE_SIZE];
   unsigned char signature[MAX_FILE_SIZE];
 
-  // TODO: Check if the message is authentic using the signature.
-  // Look at: https://wiki.openssl.org/index.php/EVP_Signing_and_Verifying
+size_t message_length = 0;
+size_t signature_length = 0;
 
-  return -1;
+    message_length = read_all_bytes(message_path, message, MAX_FILE_SIZE);
+    signature_length = read_all_bytes(sign_path, signature, MAX_FILE_SIZE);
+
+    EVP_MD_CTX *digest_context = EVP_MD_CTX_new();
+
+    if (digest_context == NULL) {
+        fprintf(stderr, "unable to allocate EVP_MD_CTX\n");
+        return -1;
+    }
+
+    if (EVP_DigestVerifyInit(digest_context, NULL, EVP_sha256(), NULL, pubkey) != 1) {
+        fprintf(stderr, "Error: EVP_DigestVerifyInit failed\n");
+        ERR_print_errors_fp(stderr);
+        EVP_MD_CTX_free(digest_context);
+        return -1;
+    }
+
+    if (EVP_DigestVerifyUpdate(digest_context, message, message_length) != 1) {
+        fprintf(stderr, "Error: EVP_DigestVerifyUpdate failed\n");
+        ERR_print_errors_fp(stderr);
+        EVP_MD_CTX_free(digest_context);
+        return -1;
+    }
+
+    int verify_status = EVP_DigestVerifyFinal(digest_context, signature, signature_length);
+
+    EVP_MD_CTX_free(digest_context);
+
+    bool is_valid_signature = verify_status == 1;
+    bool is_invalid_signature = verify_status == 0;
+
+    if (is_valid_signature) {
+        return 1;
+    } 
+    else if (is_invalid_signature) {
+        return 0;
+    } 
+    else {
+        fprintf(stderr, "Error: EVP_DigestVerifyFinal returned error\n");
+        ERR_print_errors_fp(stderr);
+        return -1;
+    }
 }
