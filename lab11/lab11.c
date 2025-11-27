@@ -63,9 +63,25 @@ int main() {
                                    "signature3.sig"};
 
   // TODO: Load the public key using PEM_read_PUBKEY
-  EVP_PKEY *pubkey = NULL;
+  const char* pubkey_filename = "public_key.pem";
 
-  FILE *pub_file = fopen("public_key.pem", "r");
+  FILE* pub_file = fopen(pubkey_filename, "r");
+
+  if(pub_file == NULL) {
+    handle_error("Error opening public_key.pem");
+  }
+
+  EVP_PKEY *pubkey = PEM_read_PUBKEY(pub_file, NULL, NULL, NULL);
+
+  fclose(pub_file);
+
+    if (pubkey == NULL) {
+        fprintf(stderr, "Error: unable to load public key from %s\n", pubkey_filename);
+        
+        ERR_print_errors_fp(stderr);
+        
+        exit(EXIT_FAILURE);
+  }
 
   // Verify each message
   for (int i = 0; i < 3; i++) {
