@@ -1,0 +1,20 @@
+#include <stdio.h>
+#include <unistd.h>
+
+// step 1: Make the thread function
+void* my_thread(void* arg) {
+  printf("Inside a thread");
+
+  return NULL;
+}
+
+int main(void)
+{
+  printf("HELLO");
+  // step 2 create the thread
+  phtread_create(thread_id, NULL, my_thread, NULL);
+  sleep(4);
+  printf("DONE");
+
+  return 0;
+}

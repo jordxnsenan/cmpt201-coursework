@@ -1,0 +1,33 @@
+#define _POSIX_C_SOURCE 200809L
+
+#include <signal.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+
+// defining the handler
+void sigint_handler(int signum) {
+  const char *msg = "CTRL-C Pressed\n";
+
+  write(STDOUT_FILENO, msg, sizeof(msg) - 1);
+}
+
+int main(void) {
+  // set up the sigaction
+  struct sigaction act;
+  act.sa_handler = &sigint_handler;
+  act.sa_flags = 0;
+  sigemptyset(&act.sa_mask);
+
+  // registering the signal handler
+  if (sigaction(SIGINT, &act, NULL) == -1) {
+    perror("sigaction()");
+    _exit(1);
+  }
+
+  while (1) {
+    sleep(1);
+  }
+
+  return 0;
+}

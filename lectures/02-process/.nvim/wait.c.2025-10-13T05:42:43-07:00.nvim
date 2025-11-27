@@ -1,0 +1,37 @@
+#include <stdio.h>     // for printf()
+#include <stdlib.h>    // for exit()
+#include <sys/types.h> // for pid_t
+#include <sys/wait.h>  // for waitpid()
+#include <unistd.h>    // for fork(), exec()
+
+int main(void) {
+  // create child process
+  pid_t pid = fork();
+
+  // parent process
+  if (pid) {
+    int wstatus = 0;
+
+    if ( waitpid(pid, &wstatus, 0) == -1 ) {
+      perror("waitpid() failed.\n");
+      exit(1);
+    }
+
+    if ( WIFEXITED(wstatus) ) {
+      printf("Reason: %d\n", WEXITSTATUS(wstatus));
+    }
+  }
+
+  // child process
+  if (pid == 0) {
+    char *const path = "/bin/ls";
+    char *const args[] = {path, "-a", "-l", NULL};
+
+    if ( execl(path, path, "-a", "-l", (char *)NULL) == -1 ) {
+      printf("execl() failed\n");
+      exit(EXIT_FAILURE);
+    }
+  }
+
+  return 0;
+}

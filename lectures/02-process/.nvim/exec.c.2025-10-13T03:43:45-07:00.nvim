@@ -1,0 +1,23 @@
+#include <stdio.h> // for printf()
+#include <unistd.h> // for fork() and exec()
+#include <sys/types.h> // for pid_t
+
+int main(void) {
+  // find out if parent or child
+  pid_t pid = fork();
+
+  // parent
+  if (pid > 0) {
+    printf("parent..\n");
+  }
+
+  else if (pid == 0) {
+    printf("Child..\n");
+  }
+
+  else {
+    printf("fork failed..\n");
+  }
+
+  return 0;
+}

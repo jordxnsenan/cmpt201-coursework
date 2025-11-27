@@ -1,0 +1,11 @@
+CC = clang
+CFLAGS = -g
+
+source = memory_mapping.c
+object = $(source:.c=.o)
+
+memory_mapping: memory_mapping.o
+	$(CC) $(CFLAGS) -o memory_mapping memory_mapping.c
+
+clean:
+	rm -f memory_mapping

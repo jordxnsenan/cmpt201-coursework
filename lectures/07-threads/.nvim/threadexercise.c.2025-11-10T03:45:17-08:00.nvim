@@ -1,0 +1,36 @@
+#include <pthread.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+
+// step 1: Make the thread function
+void *my_thread(void *arg) {
+  // typecast the passed in args
+  char *message = (char *)arg;
+  // char* message = arg also worked (shown in lectire_
+
+  printf("Inside a thread\n");
+
+  printf("Mesage is: %s\n", message);
+
+  return (void *)strlen(message);
+}
+
+int main(void) {
+  printf("HELLO\n");
+
+  // step 2 create the thread
+  pthread_t thread_id;
+  pthread_create(&thread_id, NULL, my_thread, "Hello Threads!");
+
+  // holds the answer from the thread function
+  void *ans;
+
+  // step 3: wait for the thread to terminate
+  pthread_join(thread_id, &ans);
+
+  long long length = (int)ans;
+  printf("Length of answer is: %lld\n", length);
+
+  return 0;
+}

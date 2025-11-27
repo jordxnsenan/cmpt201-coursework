@@ -1,0 +1,27 @@
+#include <stdio.h>
+#include <unistd.h>
+
+int main(void) {
+  // sleeps for 2 seconds
+  sleep(2);
+
+  printf("Slept for 2 seconds!\n");
+
+  sleep(5);
+
+  printf("Slept for 5 seconds!\n");
+  
+  // prompts user to enter a number, sleeps for that number of seconds
+  printf("How long would you like to sleep: ");
+
+  int time = 0;
+  scanf("%d", &time);
+
+  printf("Going to sleep now, ill be awake in %d seconds...\n", time);
+
+  sleep(time);
+
+  printf("I AM AWAKE\n");
+
+  return 0;
+}

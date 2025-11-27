@@ -1,0 +1,51 @@
+#define _POSIX_C_SOURCE 200809
+
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/types.h>
+
+// defining the handler
+void handle_sigint(int signum) {
+  const char *msg = "CTRL-C Pressed\n";
+
+  write(STDOUT_FILENO, msg, strlen(msg));
+}
+
+int main(void) {
+  pid_t pid = fork();
+
+  // handle parent case
+  if(pid > 0) {
+
+    // set up the sigaction
+    struct sigaction act;
+    act.sa_handler = &handle_sigint;
+    act.sa_flags = 0;
+    sigemptyset(&act.sa_mask);
+
+    // registering the signal handler
+    int ret = sigaction(SIGINT, &act, NULL);
+    if (ret == -1) {
+      perror("sigaction() failed");
+      exit(EXIT_FAILURE);
+    }
+
+    while (1) {
+      sleep(1);
+    }
+  }
+
+  if(pid == 0) {
+    pid_t parent_pid = getppid();
+
+    while(1) {
+      sleep(1);
+      kill(parent_pid, SIGINT);
+    }
+  }
+
+  return 0;
+}
